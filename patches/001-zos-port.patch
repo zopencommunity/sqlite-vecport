@@ -1,0 +1,81 @@
+diff --git c/Makefile w/Makefile
+index ee18c9c..9fb2606 100644
+--- c/Makefile
++++ w/Makefile
+@@ -3,9 +3,9 @@ COMMIT=$(shell git rev-parse HEAD)
+ VERSION=$(shell cat VERSION)
+ DATE=$(shell date +'%FT%TZ%z')
+ 
+-INSTALL_LIB_DIR = /usr/local/lib
+-INSTALL_INCLUDE_DIR = /usr/local/include
+-INSTALL_BIN_DIR = /usr/local/bin
++INSTALL_LIB_DIR ?= /usr/local/lib
++INSTALL_INCLUDE_DIR ?= /usr/local/include
++INSTALL_BIN_DIR ?= /usr/local/bin
+ 
+ ifndef CC
+ CC=gcc
+@@ -209,9 +209,9 @@ install:
+ 		install -m 644 $(TARGET_STATIC) $(INSTALL_LIB_DIR); \
+ 	fi
+ 	@if [ -f $(TARGET_CLI) ]; then \
+-		sudo install -m 755 $(TARGET_CLI) $(INSTALL_BIN_DIR); \
++		install -m 755 $(TARGET_CLI) $(INSTALL_BIN_DIR); \
+ 	fi
+-	ldconfig
++	true
+ 
+ uninstall:
+ 	rm -f $(INSTALL_LIB_DIR)/$(notdir $(TARGET_LOADABLE))
+diff --git c/sqlite-vec.c w/sqlite-vec.c
+index 982e5f8..26cb66e 100644
+--- c/sqlite-vec.c
++++ w/sqlite-vec.c
+@@ -65,6 +65,7 @@ SQLITE_EXTENSION_INIT1
+ #ifndef __EMSCRIPTEN__
+ #ifndef __COSMOPOLITAN__
+ #ifndef __wasi__
++#ifndef __MVS__
+ typedef u_int8_t uint8_t;
+ typedef u_int16_t uint16_t;
+ typedef u_int64_t uint64_t;
+@@ -72,6 +73,7 @@ typedef u_int64_t uint64_t;
+ #endif
+ #endif
+ #endif
++#endif
+ 
+ typedef int8_t i8;
+ typedef uint8_t u8;
+diff --git c/sqlite-vec.h.tmpl w/sqlite-vec.h.tmpl
+index f49f62f..3fe2aa8 100644
+--- c/sqlite-vec.h.tmpl
++++ w/sqlite-vec.h.tmpl
+@@ -13,7 +13,7 @@
+   #ifdef _WIN32
+     #define SQLITE_VEC_API __declspec(dllexport)
+   #else
+-    #define SQLITE_VEC_API
++    #define SQLITE_VEC_API __attribute__((visibility("default")))
+   #endif
+ #endif
+ 
+@@ -22,15 +22,14 @@
+ #define SQLITE_VEC_DATE "${DATE}"
+ #define SQLITE_VEC_SOURCE "${SOURCE}"
+ 
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ #define SQLITE_VEC_VERSION_MAJOR ${VERSION_MAJOR}
+ #define SQLITE_VEC_VERSION_MINOR ${VERSION_MINOR}
+ #define SQLITE_VEC_VERSION_PATCH ${VERSION_PATCH}
+ 
+-#ifdef __cplusplus
+-extern "C" {
+-#endif
+-
+ SQLITE_VEC_API int sqlite3_vec_init(sqlite3 *db, char **pzErrMsg,
+                   const sqlite3_api_routines *pApi);
+ 
