@@ -1,5 +1,5 @@
 # bump: sqlite-vec-version /SQLITE_VEC_VERSION="(.*)"/ https://github.com/asg017/sqlite-vec.git|semver:*
-SQLITE_VEC_VERSION="0.1.7-alpha.10"
+SQLITE_VEC_VERSION="0.1.8"
 
 ###
 ### Build control file for the sqlite-vec port
